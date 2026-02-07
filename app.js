@@ -1,4 +1,5 @@
 require('dotenv').config();
+const PORT = process.env.PORT || 3000;  
 const express = require('express');
 const helmet = require('helmet');
 
@@ -57,6 +58,10 @@ app.get("/credenciales.html", (req, res) => {
 });
 
 */
-app.listen(process.env.PORT, () => {
+/*app.listen(process.env.PORT, () => {
   console.log("Servidor iniciado");
+});
+*/
+app.listen(PORT, () => {
+  console.log(`Servidor iniciado en puerto ${PORT}`);
 });
