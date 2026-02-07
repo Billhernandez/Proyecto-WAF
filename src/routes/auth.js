@@ -1,4 +1,4 @@
-/*const express = require('express');
+const express = require('express');
 const router = express.Router();
 const { getConnection, sql } = require('../config/db');
 const bcrypt = require('bcrypt');
@@ -86,57 +86,6 @@ res.json({
 
   }
 
-});
-
-module.exports = router;
-*/
-
-const express = require('express');
-const router = express.Router();
-const { getConnection, sql } = require('../config/db');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-
-router.post('/login', async (req, res) => {
-  try {
-    const { usuario, password } = req.body;
-    const pool = await getConnection();
-
-    const result = await pool.request()
-      .input('correo', sql.VarChar, usuario)
-      .execute('sp_login_usuario');
-
-    if (result.recordset.length === 0)
-      return res.status(401).json({ mensaje: "Credenciales inválidas" });
-
-    const usuarioBD = result.recordset[0];
-
-    if (!usuarioBD.activo)
-      return res.status(403).json({ mensaje: "Usuario inactivo" });
-
-    const passwordValido = await bcrypt.compare(password, usuarioBD.password);
-    if (!passwordValido)
-      return res.status(401).json({ mensaje: "Credenciales inválidas" });
-
-    const token = jwt.sign(
-      { id: usuarioBD.id, correo: usuarioBD.correo, nombre: usuarioBD.nombre },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
-      maxAge: 1000 * 60 * 60
-    });
-
-    res.json({ mensaje: "Login exitoso" });
-
-  } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ mensaje: "Error interno del servidor" });
-  }
 });
 
 module.exports = router;
